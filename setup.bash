@@ -8,3 +8,4 @@ mkdir -p sonarr/config
 mkdir -p jellyseerr/config
 mkdir -p prowlarr/config
 mkdir -p transmission/config
+mkdir -p gluetun

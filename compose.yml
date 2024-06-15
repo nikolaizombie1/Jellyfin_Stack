@@ -71,7 +71,7 @@ services:
       - ./sonarr/data:/data
       - /home/weeb/Mass_Storage/Downloads/complete:/downloads/complete
       - /home/weeb/Mass_Storage:/mnt
-    network_mode: 'host'
+    network_mode: "service:gluetun"
     restart: unless-stopped
 
   jellyseerr:
@@ -89,19 +89,19 @@ services:
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
+    network_mode: "service:gluetun"
     environment:
       - PUID=1000
       - PGID=1000
       - TZ="America/Puerto_Rico"
     volumes:
       - ./prowlarr/config:/config
-    ports:
-      - 9696:9696
     restart: unless-stopped
 
   transmission:
    image: lscr.io/linuxserver/transmission:latest
    container_name: transmission
+   network_mode: "service:gluetun"
    environment:
      - PUID=1000
      - PGID=1000
@@ -109,12 +109,44 @@ services:
    volumes:
      - /home/weeb/Docker_Stuff/Jellyfin_Stack/transmission/conifg/config
      - /home/weeb/Mass_Storage/Downloads:/downloads
-   ports:
-     - 9091:9091
-     - 51413:51413
-     - 51413:51413/udp
    restart: unless-stopped   
+
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - VPN_SERVICE_PROVIDER=mullvad
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY_FILE=/run/secrets/wireguard_private_key
+      - WIREGUARD_ADDRESSES_FILE=/run/secrets/wireguard_private_key
+      - SERVER_CITIES_FILE=/run/secrets/wireguard_cities
+    ports:
+      - 8888:8888/tcp # HTTP proxy
+      - 8388:8388/tcp # Shadowsocks
+      - 8388:8388/udp # Shadowsocks
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+      - 9696:9696
+      - 8989:8989
+    volumes:
+      - ./gluetun:/gluetun
+    secrets:
+      - wireguard_private_key
+      - wireguard_addresses
+      - wireguard_cities
+
 
 secrets:
   traefik_secret:
     file: ./secrets/traefik-api-key.txt
+  wireguard_private_key:
+    file: ./secrets/wireguard-private-key.txt
+  wireguard_addresses:
+    file: ./secrets/wireguard-addresses.txt
+  wireguard_cities:
+    file: ./secrets/wireguard-cities.txt
