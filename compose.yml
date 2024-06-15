@@ -26,12 +26,14 @@ services:
     security_opt:
       - no-new-privileges:true
     environment:
-      CF_DNS_API_TOKEN: traefik_secret
-      CF_ZONE_API_TOKEN: traefik_secret
+      CF_DNS_API_TOKEN_FILE: /run/secrets/traefik_secret
+      CF_ZONE_API_TOKEN_FILE: /run/secrets/traefik_secret
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/config:/etc/traefik
+    secrets:
+      - traefik_secret
 
   jellyfin:
     image: jellyfin/jellyfin
@@ -107,13 +109,11 @@ services:
    volumes:
      - /home/weeb/Docker_Stuff/Jellyfin_Stack/transmission/conifg/config
      - /home/weeb/Mass_Storage/Downloads:/downloads
-     - /home/weeb/Mass_Storage/Downloads:/downloads
    ports:
      - 9091:9091
      - 51413:51413
      - 51413:51413/udp
    restart: unless-stopped   
-
 
 secrets:
   traefik_secret:
