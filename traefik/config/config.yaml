@@ -1,0 +1,46 @@
+http:
+ #region routers
+  routers:
+    jellyfin:
+      entryPoints:
+        - "https"
+      rule: "Host(`jellyfin.fabiomatos999.com`)"
+      middlewares:
+        - default-headers
+      tls: 
+        certResolver: cloudflare
+      service: jellyfin
+    jellyseerr:
+      entryPoints:
+        - "https"
+      rule: "Host(`jellyseerr.fabiomatos999.com`)"
+      middlewares:
+        - default-headers
+      tls: 
+        certResolver: cloudflare
+      service: jellyseerr
+ #region services
+  services:
+    jellyfin:
+      loadBalancer:
+        servers:
+          - url: "http://10.0.0.71:8096"
+        passHostHeader: true
+    jellyseerr:
+      loadBalancer:
+        servers:
+          - url: "http://10.0.0.71:5055"
+        passHostHeader: true
+  middlewares:
+    default-headers:
+      headers:
+        frameDeny: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 15552000
+        customFrameOptionsValue: SAMEORIGIN
+        customRequestHeaders:
+          X-Forwarded-Proto: https

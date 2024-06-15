@@ -1,0 +1,120 @@
+services:
+  ddclient:
+    image: lscr.io/linuxserver/ddclient:latest
+    container_name: ddclient
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ="America/Puerto_Rico"
+    volumes:
+      - ./secrets:/config
+    restart: unless-stopped
+
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: unless-stopped
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --api.insecure=true
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The HTTPS port
+      - "443:443"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      CF_DNS_API_TOKEN: traefik_secret
+      CF_ZONE_API_TOKEN: traefik_secret
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/config:/etc/traefik
+
+  jellyfin:
+    image: jellyfin/jellyfin
+    build: ./jellyfin/
+    container_name: jellyfin
+    user: 1000:1000
+    group_add:
+      - "105"
+    network_mode: 'host'
+    volumes:
+      - ./jellyfin/config:/config
+      - ./jellyfin/cache:/cache
+      - type: bind
+        source: /home/weeb/Mass_Storage
+        target: /media
+        read_only: true
+    restart: 'unless-stopped'
+    # Optional - alternative address used for autodiscovery
+    environment:
+      - JELLYFIN_PublishedServerUrl=jellyfin.fabiomatos999.com
+    # Optional - may be necessary for docker healthcheck to pass if running in host network mode
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+
+  sonarr:
+    image: ghcr.io/hotio/sonarr
+    container_name: sonarr
+    environment:
+      - PUID = 1000
+      - PGID = 1000
+      - UMASK = 002
+      - TZ="America/Puerto_Rico"
+    volumes:
+      - ./sonarr/config:/config
+      - ./sonarr/data:/data
+      - /home/weeb/Mass_Storage/Downloads/complete:/downloads/complete
+      - /home/weeb/Mass_Storage:/mnt
+    network_mode: 'host'
+    restart: unless-stopped
+
+  jellyseerr:
+      image: fallenbagel/jellyseerr:latest
+      container_name: jellyseerr
+      environment:
+           - LOG_LEVEL=debug
+           - TZ="America/Puerto_Rico"
+      ports:
+           - 5055:5055
+      volumes:
+           - ./jellyseerr/config:/app/config
+      restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ="America/Puerto_Rico"
+    volumes:
+      - ./prowlarr/config:/config
+    ports:
+      - 9696:9696
+    restart: unless-stopped
+
+  transmission:
+   image: lscr.io/linuxserver/transmission:latest
+   container_name: transmission
+   environment:
+     - PUID=1000
+     - PGID=1000
+     - TZ="America/Puerto_Rico"
+   volumes:
+     - /home/weeb/Docker_Stuff/Jellyfin_Stack/transmission/conifg/config
+     - /home/weeb/Mass_Storage/Downloads:/downloads
+     - /home/weeb/Mass_Storage/Downloads:/downloads
+   ports:
+     - 9091:9091
+     - 51413:51413
+     - 51413:51413/udp
+   restart: unless-stopped   
+
+
+secrets:
+  traefik_secret:
+    file: ./secrets/traefik-api-key.txt
