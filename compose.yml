@@ -5,7 +5,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ="America/Puerto_Rico"
+      - TZ="America/New_York"
     volumes:
       - ./secrets:/config
     restart: unless-stopped
@@ -37,7 +37,6 @@ services:
 
   jellyfin:
     image: jellyfin/jellyfin
-    build: ./jellyfin/
     container_name: jellyfin
     user: 1000:1000
     group_add:
@@ -50,7 +49,7 @@ services:
         source: /home/weeb/Mass_Storage
         target: /media
         read_only: true
-    restart: 'unless-stopped'
+    restart: unless-stopped
     # Optional - alternative address used for autodiscovery
     environment:
       - JELLYFIN_PublishedServerUrl=jellyfin.fabiomatos999.com
@@ -65,7 +64,7 @@ services:
       - PUID = 1000
       - PGID = 1000
       - UMASK = 002
-      - TZ="America/Puerto_Rico"
+      - TZ="America/New_York"
     volumes:
       - ./sonarr/config:/config
       - ./sonarr/data:/data
@@ -74,18 +73,6 @@ services:
     network_mode: "service:gluetun"
     restart: unless-stopped
 
-  jellyseerr:
-      image: fallenbagel/jellyseerr:latest
-      container_name: jellyseerr
-      environment:
-           - LOG_LEVEL=debug
-           - TZ="America/Puerto_Rico"
-      ports:
-           - 5055:5055
-      volumes:
-           - ./jellyseerr/config:/app/config
-      restart: unless-stopped
-
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -93,7 +80,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ="America/Puerto_Rico"
+      - TZ="America/New_York"
     volumes:
       - ./prowlarr/config:/config
     restart: unless-stopped
@@ -105,7 +92,7 @@ services:
    environment:
      - PUID=1000
      - PGID=1000
-     - TZ="America/Puerto_Rico"
+     - TZ="America/New_York"
    volumes:
      - /home/weeb/Docker_Stuff/Jellyfin_Stack/transmission/conifg/config
      - /home/weeb/Mass_Storage/Downloads:/downloads
@@ -139,6 +126,7 @@ services:
       - wireguard_private_key
       - wireguard_addresses
       - wireguard_cities
+    restart: unless-stopped
 
 
 secrets:
