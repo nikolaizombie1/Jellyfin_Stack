@@ -40,7 +40,7 @@ services:
     container_name: jellyfin
     user: 1000:1000
     group_add:
-      - "105"
+      - "993"
     network_mode: 'host'
     volumes:
       - ./jellyfin/config:/config
@@ -49,6 +49,8 @@ services:
         source: /home/weeb/Mass_Storage
         target: /media
         read_only: true
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
     restart: unless-stopped
     # Optional - alternative address used for autodiscovery
     environment:
