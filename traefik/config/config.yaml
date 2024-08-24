@@ -10,15 +10,15 @@ http:
       tls: 
         certResolver: cloudflare
       service: jellyfin
-    sonarr:
+    jellyseerr:
       entryPoints:
         - "https"
-      rule: "Host(`sonarr.fabiomatos999.com`)"
+      rule: "Host(`jellyseerr.fabiomatos999.com`)"
       middlewares:
         - default-headers
       tls: 
         certResolver: cloudflare
-      service: sonarr
+      service: jellyseerr
  #region services
   services:
     jellyfin:
@@ -26,10 +26,10 @@ http:
         servers:
           - url: "http://192.168.0.113:8096"
         passHostHeader: true
-    sonarr:
+    jellyseerr:
       loadBalancer:
         servers:
-          - url: "http://192.168.0.113:8989"
+          - url: "http://192.168.0.113:5055"
         passHostHeader: true
   middlewares:
     default-headers:

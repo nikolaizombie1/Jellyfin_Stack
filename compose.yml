@@ -75,6 +75,20 @@ services:
     network_mode: "service:gluetun"
     restart: unless-stopped
 
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./radarr/config:/config
+      - /home/weeb/Mass_Storage/Downloads/complete:/downloads/complete
+      - /home/weeb/Mass_Storage:/mnt
+    network_mode: "service:gluetun"
+    restart: unless-stopped
+
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -100,6 +114,30 @@ services:
      - /home/weeb/Mass_Storage/Downloads:/downloads
    restart: unless-stopped   
 
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - LOG_LEVEL=debug
+      - TZ="America/New_York"
+      - PORT=5055 #optional
+    volumes:
+      - ./jellyseerr/config:/app/config
+    network_mode: "service:gluetun"
+    restart: unless-stopped
+
+  flaresolverr:
+    # DockerHub mirror flaresolverr/flaresolverr:latest
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_HTML=${LOG_HTML:-false}
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+      - TZ=America/New_York
+    network_mode: "service:gluetun"
+    restart: unless-stopped
+   
   gluetun:
     image: qmcgaw/gluetun
     container_name: gluetun
@@ -122,6 +160,9 @@ services:
       - 51413:51413/udp
       - 9696:9696
       - 8989:8989
+      - 7878:7878
+      - 5055:5055
+      - 8091:8191
     volumes:
       - ./gluetun:/gluetun
     secrets:
